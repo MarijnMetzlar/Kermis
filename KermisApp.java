@@ -7,70 +7,203 @@ Kermis heeft zes attracties, dit zijn subklasses van hoofdklasse attractie.
 6 voor ladderklimmen. */
 public class KermisApp {
     public static void main(String[] args) {
-        OmzetManager omzetKermis = new OmzetManager();
-        omzetKermis.startUp();
+        KermisManager kermisManager = new KermisManager();
+        kermisManager.startUp();
     }
 }
 
-class OmzetManager {
+class KermisManager {
     
     /* FD: Wanneer de gebruiker een getal invult moet de juiste attractie doorgegeven worden.
     TS: De input wordt vergeleken met de collectie/array.
     TS: Vervolgens wordt een methode in die class van de array aangeroepen.
     TS: Voor testing purposes, maak de scanner een aantal keer loopend.*/
     Attractie[] attracties = new Attractie[6];
-    int attractieIngaan = 5;
-    
+    boolean isEnded = false;
+    int attractieIngaan = 6;
+
     /* FD: De gebruiker kan een getal ingeven/intypen.
     TS: Een Scanner moet geimport worden.
     TS: De Scanner moet geinitialiseerd worden.
     TS: Zorg ervoor dat de gebruiker zijn input kan geven. */
+
+    /* FD: Wanneer de gebruiker op q/o/k klikt, dan stopt het spel/ wordt omzet getoond/ wordt aantal kaartjes laten zien.
+    TS: De Scanner moet herkennen wat voor soort input gegeven wordt.
+    TS: Maak if statements met wanneer de q als input wordt gegeven dan system.exit(0);
+    TS: Maak if statements met wanneer de o wordt gegeven, dan tel alle omzet van elke attractie bij elkaar en geef dat weer.
+    TS: Maak if statements met wanneer de k wordt gegeven, dan tel alle kaartjes van elke attractie bij elkaar en geef dat weer. */
     void startUp()
     {
         setAttracties();
+
         Scanner sc = new Scanner(System.in);
-        for(int i = 0; i < attractieIngaan; i++)
+        while(!isEnded)
         {
-            int input = sc.nextInt();
-            pickAttractie(input);
+            String input = sc.nextLine();
+            if(input.length() != 1) {
+                System.out.println("Dit snap ik niet!");
+            } else {
+                if(input.matches("^[1-6]*$")) 
+                {
+                    int inputNr = Integer.parseInt(input);
+                    attracties[inputNr - 1].draaien();
+                } 
+                else 
+                {
+                    if(input.equals("q")) {
+                        System.out.println("De kermis is gesloten.");
+                        System.exit(0);
+                        isEnded = true;
+                    } 
+                    else if(input.equals("o")) {
+                        System.out.println("De totale omzet is: " + Kassa.totaleOmzet);
+                        for(Attractie at : attracties)
+                        {
+                            if(at.omzet > 0)
+                                System.out.println(at.naam + ": " + at.omzet);
+                        }
+                    } 
+                    else if(input.equals("k")) 
+                    {
+                        System.out.println("Het totaal aantal gekochte kaartjes is: " + Kassa.totaalAantalKaartjes);
+                        for(Attractie at : attracties)
+                        {
+                            if(at.kaartjesGekocht > 0)
+                                System.out.println(at.naam + ": " + at.kaartjesGekocht);
+                        }
+                    } 
+                    else {
+                        System.out.println("Dit snap ik niet!");
+                    }
+                }
+            }
         }
+        if(sc != null)
+            sc.close();
     }
 
+    /* FD: De applicatie moet een selectie met attracties hebben, met hun eigen prijs, naam en oppervlakte.
+    TS: De attracties moeten een voor een worden geinstantieerd.
+    TS: De attracties moeten een naam en prijs worden gegeven.
+    TS: Deze aangemaakte attracties moeten teruggekoppeld worden aan de attracties array. */
     void setAttracties()
     {
-        attracties[0] = new BotsAuto();
-        attracties[1] = new Spin();
-    }
+        Attractie botsAuto = new BotsAuto();
+        botsAuto.naam = "botsauto";
+        botsAuto.prijs = 2.50f;
+        attracties[0] = botsAuto;
+        
+        RisicoRijkeAttracties spin = new Spin();
+        spin.naam = "spin";
+        spin.prijs = 2.25f;
+        spin.draaiLimiet = 5;
+        attracties[1] = spin;
 
-    void pickAttractie(int i)
-    {
-        if(attracties[i] != null)
-            attracties[i].draaien();
-        else
-            System.out.println(attracties[i]);
+        Attractie spiegelPaleis = new SpiegelPaleis();
+        spiegelPaleis.naam = "spiegelpaleis";
+        spiegelPaleis.prijs = 2.75f;
+        attracties[2] = spiegelPaleis;
+
+        Attractie spookhuis = new Spookhuis();
+        spookhuis.naam = "spookhuis";
+        spookhuis.prijs = 3.20f;
+        attracties[3] = spookhuis;
+
+        RisicoRijkeAttracties hawaii = new Hawaii();
+        hawaii.naam = "hawaii";
+        hawaii.prijs = 2.90f;
+        hawaii.draaiLimiet = 10;
+        attracties[4] = hawaii;
+
+        Attractie ladderKlimmen = new LadderKlimmen();
+        ladderKlimmen.naam = "ladderklimmen";
+        ladderKlimmen.prijs = 5.00f;
+        attracties[5] = ladderKlimmen;
     }
+}
+
+/* FD: De gebruiker moet de totale omzet kunnen zien.
+TS: De totale omzet moet worden bijgehouden in de kassa.
+TS: We maken de totaleOmzet en totaalAantalKaartjes static, hierdoor kunnen we hem blijven updaten via elke class */
+class Kassa {
+    static float totaleOmzet = 0;
+    static int totaalAantalKaartjes = 0;
 }
 
 abstract class Attractie {
     String naam;
     float prijs;
     int oppervlakte;
+    float omzet;
+    int kaartjesGekocht;
     
-    abstract void draaien();
-}
-
-class BotsAuto extends Attractie {
-
     void draaien()
     {
-        System.out.println("Draaien in botsauto");
+        System.out.println("draaien in " + naam);
+        omzet += prijs;
+        Kassa.totaleOmzet += prijs;
+        kaartjesGekocht += 1;
+        Kassa.totaalAantalKaartjes += 1;
     }
 }
 
-class Spin extends Attractie {
+abstract class RisicoRijkeAttracties extends Attractie {
+    //Aantal keer dat deze attracties mogen draaien voordat onderhoud plaatsvind.
+    int draaiLimiet;
 
-    void draaien()
+    abstract void opstellingsKeuring();
+
+    abstract void onderhoudsBeurt();
+}
+
+interface GokAttractie {
+
+    public abstract void kansSpelBelastingBetalen();
+}
+
+class BotsAuto extends Attractie { }
+
+class Spin extends RisicoRijkeAttracties {
+
+    void opstellingsKeuring()
     {
-        System.out.println("Draaien in spin");
+        System.out.println("Opstellingskeuring in spin");
+        //Dit moet gebeuren elke keer als de attractie het draaiLimiet over gaat. (Dus bijv elke 5x)
+        if(kaartjesGekocht >= draaiLimiet)
+            onderhoudsBeurt();
+    }
+
+    void onderhoudsBeurt()
+    {
+        System.out.println("Onderhoudsbeurt in spin");
+    }
+}
+
+class SpiegelPaleis extends Attractie { }
+
+class Spookhuis extends Attractie { }
+
+class Hawaii extends RisicoRijkeAttracties {
+
+    void opstellingsKeuring()
+    {
+        System.out.println("Opstellingskeuring in hawaii");
+        //Dit moet gebeuren elke keer als de attractie het draaiLimiet over gaat. (Dus bijv elke 5x)
+        if(kaartjesGekocht >= draaiLimiet)
+            onderhoudsBeurt();
+    }
+
+    void onderhoudsBeurt()
+    {
+        System.out.println("Onderhoudsbeurt in hawaii");
+    }
+}
+
+class LadderKlimmen extends Attractie implements GokAttractie {
+
+    public void kansSpelBelastingBetalen()
+    {
+        System.out.println("Belasting betalen in ladderklimmen");
+        //kansSpelBelasting = 30% van omzet. Dit wordt opzij gezet, en voor nu niet opgeslagen.
     }
 }
