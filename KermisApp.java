@@ -18,7 +18,7 @@ class KermisManager {
     TS: De input wordt vergeleken met de collectie/array.
     TS: Vervolgens wordt een methode in die class van de array aangeroepen.
     TS: Voor testing purposes, maak de scanner een aantal keer loopend.*/
-    Attractie[] attracties = new Attractie[6];
+    static Attractie[] attracties = new Attractie[6];
     boolean isEnded = false;
     int attractieIngaan = 6;
 
@@ -140,15 +140,30 @@ class Kassa {
 
 class BelastingInspecteur {
 
-    //IK HAD NIET GENOEG TIJD, DIT WIL IK NOG MEER UPDATEN!!!
+    /* FD: De belastingInspecteur moet per gokAttractie belasting heffen.
+    TS: Het aantal gokattracties moet gechecked worden.
+    TS: Aangezien we met een functionele interface werken, moet er een lambda expressie gedefinieerd worden.
+    TS: De totale omzet moet berekend worden na de belasting die betaald is. */
     void bezoek()
     {
-        System.out.println("Belasting moet betaald worden!");
-        //if(this instanceof GokAttractie)
-        //{
-            //Roep kansSpelBelastingBetalen(); aan.
-            //GokAttractie aftrekken = (x) -> x - ((x / 100) * 30);
-        //}
+        Kassa.belastingInspecteurOpVisiteAantal++;
+
+        for(Attractie a : KermisManager.attracties)
+        {
+            if(a instanceof GokAttractie)
+            {
+                GokAttractie belasting = (x) -> x - ((x / 100) * 30);
+                uitrekenen( belasting );
+            }
+        }
+        
+    }
+
+    void uitrekenen(GokAttractie g)
+    {
+        float uitkomst = g.kansSpelBelastingBetalen(Kassa.totaleOmzet);
+        Kassa.totaleOmzet = uitkomst;
+        System.out.println("De belasting die betaald is: " + uitkomst);
     }
 }
 
@@ -195,7 +210,12 @@ abstract class RisicoRijkeAttracties extends Attractie {
 
 class BotsAuto extends Attractie { }
 
-class Spin extends RisicoRijkeAttracties {
+class Spin extends RisicoRijkeAttracties implements GokAttractie {
+
+    @Override
+    public float kansSpelBelastingBetalen(float i) {
+        return i;
+    }
 
     void opstellingsKeuring()
     {
@@ -229,15 +249,14 @@ class Hawaii extends RisicoRijkeAttracties {
 
 class LadderKlimmen extends Attractie implements GokAttractie {
 
-    //IK HAD NIET GENOEG TIJD, DIT WIL IK NOG MEER UPDATEN!!!
-    public void kansSpelBelastingBetalen()
-    {
-        System.out.println("Belasting betalen in ladderklimmen");
-        //kansSpelBelasting = 30% van omzet. Dit wordt opzij gezet, en voor nu niet opgeslagen.
+    @Override
+    public float kansSpelBelastingBetalen(float i) {
+        return i;
     }
 }
 
+@FunctionalInterface
 interface GokAttractie {
 
-    public abstract void kansSpelBelastingBetalen();
+    float kansSpelBelastingBetalen(float i);
 }
