@@ -22,6 +22,8 @@ class KermisManager {
     boolean isEnded = false;
     int attractieIngaan = 6;
 
+    String[] attractieNamen = {"botsauto", "spin", "spiegelpaleis", "spookhuis", "hawaii", "ladderklimmen"};
+
     /* FD: De gebruiker kan een getal ingeven/intypen.
     TS: Een Scanner moet geimport worden.
     TS: De Scanner moet geinitialiseerd worden.
@@ -89,34 +91,34 @@ class KermisManager {
     void setAttracties()
     {
         Attractie botsAuto = new BotsAuto();
-        botsAuto.naam = "botsauto";
+        botsAuto.naam = attractieNamen[0];
         botsAuto.prijs = 2.50f;
         attracties[0] = botsAuto;
         
         RisicoRijkeAttracties spin = new Spin();
-        spin.naam = "spin";
+        spin.naam = attractieNamen[1];
         spin.prijs = 2.25f;
         spin.draaiLimiet = 5;
         attracties[1] = spin;
 
         Attractie spiegelPaleis = new SpiegelPaleis();
-        spiegelPaleis.naam = "spiegelpaleis";
+        spiegelPaleis.naam = attractieNamen[2];
         spiegelPaleis.prijs = 2.75f;
         attracties[2] = spiegelPaleis;
 
         Attractie spookhuis = new Spookhuis();
-        spookhuis.naam = "spookhuis";
+        spookhuis.naam = attractieNamen[3];
         spookhuis.prijs = 3.20f;
         attracties[3] = spookhuis;
 
         RisicoRijkeAttracties hawaii = new Hawaii();
-        hawaii.naam = "hawaii";
+        hawaii.naam = attractieNamen[4];
         hawaii.prijs = 2.90f;
         hawaii.draaiLimiet = 10;
         attracties[4] = hawaii;
 
         Attractie ladderKlimmen = new LadderKlimmen();
-        ladderKlimmen.naam = "ladderklimmen";
+        ladderKlimmen.naam = attractieNamen[5];
         ladderKlimmen.prijs = 5.00f;
         attracties[5] = ladderKlimmen;
     }
@@ -144,21 +146,37 @@ abstract class Attractie {
         Kassa.totaleOmzet += prijs;
         kaartjesGekocht += 1;
         Kassa.totaalAantalKaartjes += 1;
+        
+        if(this instanceof GokAttractie)
+        {
+            //Roep kansSpelBelastingBetalen(); aan.
+            //GokAttractie aftrekken = (x) -> x - ((x / 100) * 30);
+        }
     }
 }
 
 abstract class RisicoRijkeAttracties extends Attractie {
     //Aantal keer dat deze attracties mogen draaien voordat onderhoud plaatsvind.
     int draaiLimiet;
+    int onderhoudAantal;
+
+    void draaien() {
+        
+        int limiet = draaiLimiet * (onderhoudAantal + 1);
+        
+        if(kaartjesGekocht >= limiet)
+        {
+            onderhoudAantal++;
+            opstellingsKeuring();
+            return;
+        }
+        else
+            super.draaien();
+    }
 
     abstract void opstellingsKeuring();
 
     abstract void onderhoudsBeurt();
-}
-
-interface GokAttractie {
-
-    public abstract void kansSpelBelastingBetalen();
 }
 
 class BotsAuto extends Attractie { }
@@ -167,10 +185,8 @@ class Spin extends RisicoRijkeAttracties {
 
     void opstellingsKeuring()
     {
-        System.out.println("Opstellingskeuring in spin");
-        //Dit moet gebeuren elke keer als de attractie het draaiLimiet over gaat. (Dus bijv elke 5x)
-        if(kaartjesGekocht >= draaiLimiet)
-            onderhoudsBeurt();
+        System.out.println("Er moet een keuring worden ondergaan in Spin!");
+        onderhoudsBeurt();
     }
 
     void onderhoudsBeurt()
@@ -187,10 +203,8 @@ class Hawaii extends RisicoRijkeAttracties {
 
     void opstellingsKeuring()
     {
-        System.out.println("Opstellingskeuring in hawaii");
-        //Dit moet gebeuren elke keer als de attractie het draaiLimiet over gaat. (Dus bijv elke 5x)
-        if(kaartjesGekocht >= draaiLimiet)
-            onderhoudsBeurt();
+        System.out.println("Er moet een keuring worden ondergaan in Hawaii!");
+        onderhoudsBeurt();
     }
 
     void onderhoudsBeurt()
@@ -206,4 +220,9 @@ class LadderKlimmen extends Attractie implements GokAttractie {
         System.out.println("Belasting betalen in ladderklimmen");
         //kansSpelBelasting = 30% van omzet. Dit wordt opzij gezet, en voor nu niet opgeslagen.
     }
+}
+
+interface GokAttractie {
+
+    public abstract void kansSpelBelastingBetalen();
 }
