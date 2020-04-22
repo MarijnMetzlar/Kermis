@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 /* Opdracht Kermis
@@ -19,6 +20,7 @@ class KermisManager {
     TS: Vervolgens wordt een methode in die class van de array aangeroepen.
     TS: Voor testing purposes, maak de scanner een aantal keer loopend.*/
     static Attractie[] attracties = new Attractie[6];
+    ArrayList<Attractie> attractieMetProblemen = new ArrayList<Attractie>();
     boolean isEnded = false;
     int attractieIngaan = 6;
 
@@ -48,7 +50,13 @@ class KermisManager {
                 if(input.matches("^[1-6]*$")) 
                 {
                     int inputNr = Integer.parseInt(input);
-                    attracties[inputNr - 1].draaien();
+                    try {
+                        attracties[inputNr - 1].draaien();
+                    } catch (Exception e) {
+                        System.out.println("De attractie: " + attracties[inputNr - 1].naam + " moet gekeurd worden!");
+                        if(!attractieMetProblemen.contains(attracties[inputNr - 1]))
+                            attractieMetProblemen.add(attracties[inputNr - 1]);
+                    }
                 } 
                 else 
                 {
@@ -78,6 +86,23 @@ class KermisManager {
                     {
                         BelastingInspecteur bi = new BelastingInspecteur();
                         bi.bezoek();
+                    }
+                    else if(input.equals("m"))
+                    {
+                        if(attractieMetProblemen.size() > 0)
+                        {
+                            System.out.println("De monteur gaat aan de slag");
+                            if(attractieMetProblemen.get(0) instanceof RisicoRijkeAttracties)
+                            {
+                                RisicoRijkeAttracties r = (RisicoRijkeAttracties)attractieMetProblemen.get(0);
+                                r.opstellingsKeuring();
+                                attractieMetProblemen.remove(0);
+                            }
+                        }
+                        else
+                        {
+                            System.out.println("De monteur heeft niets om te checken!");
+                        }
                     }
                     else {
                         System.out.println("Dit snap ik niet!");
@@ -174,7 +199,7 @@ abstract class Attractie {
     float omzet;
     int kaartjesGekocht;
     
-    void draaien()
+    void draaien() throws Exception
     {
         System.out.println("draaien in " + naam);
         omzet += prijs;
@@ -187,17 +212,13 @@ abstract class Attractie {
 abstract class RisicoRijkeAttracties extends Attractie {
     //Aantal keer dat deze attracties mogen draaien voordat onderhoud plaatsvind.
     int draaiLimiet;
-    int onderhoudAantal;
+    int gekeurdAantal;
 
-    void draaien() {
+    void draaien() throws Exception {
         
-        int limiet = draaiLimiet * (onderhoudAantal + 1);
-        
-        if(kaartjesGekocht >= limiet)
+        if(kaartjesGekocht >= draaiLimiet * (gekeurdAantal + 1))
         {
-            onderhoudAantal++;
-            opstellingsKeuring();
-            return;
+            throw new Exception();
         }
         else
             super.draaien();
@@ -219,13 +240,13 @@ class Spin extends RisicoRijkeAttracties implements GokAttractie {
 
     void opstellingsKeuring()
     {
-        System.out.println("Er moet een keuring worden ondergaan in Spin!");
+        gekeurdAantal++;
         onderhoudsBeurt();
     }
 
     void onderhoudsBeurt()
     {
-        System.out.println("Onderhoudsbeurt in spin");
+        System.out.println("De monteur heeft: " + naam + " gekeurd, en mag weer verder");
     }
 }
 
@@ -237,13 +258,13 @@ class Hawaii extends RisicoRijkeAttracties {
 
     void opstellingsKeuring()
     {
-        System.out.println("Er moet een keuring worden ondergaan in Hawaii!");
+        gekeurdAantal++;
         onderhoudsBeurt();
     }
 
     void onderhoudsBeurt()
     {
-        System.out.println("Onderhoudsbeurt in hawaii");
+        System.out.println("De monteur heeft: " + naam + " gekeurd, en mag weer verder");
     }
 }
 
