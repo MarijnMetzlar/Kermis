@@ -74,6 +74,11 @@ class KermisManager {
                                 System.out.println(at.naam + ": " + at.kaartjesGekocht);
                         }
                     } 
+                    else if(input.equals("b"))
+                    {
+                        BelastingInspecteur bi = new BelastingInspecteur();
+                        bi.bezoek();
+                    }
                     else {
                         System.out.println("Dit snap ik niet!");
                     }
@@ -130,6 +135,21 @@ TS: We maken de totaleOmzet en totaalAantalKaartjes static, hierdoor kunnen we h
 class Kassa {
     static float totaleOmzet = 0;
     static int totaalAantalKaartjes = 0;
+    static int belastingInspecteurOpVisiteAantal = 0;
+}
+
+class BelastingInspecteur {
+
+    //IK HAD NIET GENOEG TIJD, DIT WIL IK NOG MEER UPDATEN!!!
+    void bezoek()
+    {
+        System.out.println("Belasting moet betaald worden!");
+        //if(this instanceof GokAttractie)
+        //{
+            //Roep kansSpelBelastingBetalen(); aan.
+            //GokAttractie aftrekken = (x) -> x - ((x / 100) * 30);
+        //}
+    }
 }
 
 abstract class Attractie {
@@ -146,12 +166,6 @@ abstract class Attractie {
         Kassa.totaleOmzet += prijs;
         kaartjesGekocht += 1;
         Kassa.totaalAantalKaartjes += 1;
-        
-        if(this instanceof GokAttractie)
-        {
-            //Roep kansSpelBelastingBetalen(); aan.
-            //GokAttractie aftrekken = (x) -> x - ((x / 100) * 30);
-        }
     }
 }
 
@@ -215,6 +229,7 @@ class Hawaii extends RisicoRijkeAttracties {
 
 class LadderKlimmen extends Attractie implements GokAttractie {
 
+    //IK HAD NIET GENOEG TIJD, DIT WIL IK NOG MEER UPDATEN!!!
     public void kansSpelBelastingBetalen()
     {
         System.out.println("Belasting betalen in ladderklimmen");
